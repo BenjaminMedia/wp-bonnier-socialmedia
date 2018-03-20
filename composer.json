@@ -1,0 +1,14 @@
+{
+    "name": "bonnier/wp-bonnier-some",
+    "description": "Plugin for integrating social media into the application.",
+    "type": "wordpress-plugin",
+    "require": {
+        "league/oauth2-client": "^2.3",
+        "guzzlehttp/guzzle": "^6.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Bonnier\\WP\\SoMe\\": "src/"
+        }
+    },
+}
