@@ -3,9 +3,6 @@
 namespace Bonnier\WP\SoMe;
 
 use Bonnier\WP\SoMe\Http\Routes;
-use Bonnier\WP\SoMe\Providers\InstagramProvider;
-use Bonnier\WP\SoMe\Providers\PinterestProvider;
-use Bonnier\WP\SoMe\Repositories\PinterestRepository;
 use Bonnier\WP\SoMe\Repositories\SoMeRepository;
 use Bonnier\WP\SoMe\Settings\SettingsPage;
 
@@ -13,6 +10,18 @@ class SoMe
 {
     /** @var SoMe */
     private static $instance;
+    
+    /** @var string Directory of this class */
+    private $dir;
+    
+    /** @var string Basename of this class */
+    private $basename;
+    
+    /** @var string Plugins directory for this plugin */
+    private $plugin_dir;
+    
+    /** @var string Plugins url for this plugin */
+    private $plugin_url;
     
     private $settings;
     private $routes;
@@ -53,6 +62,15 @@ class SoMe
     public function getSoMeRepo()
     {
         return $this->soMeRepo;
+    }
+    
+    private function __construct()
+    {
+        // Set plugin file variables
+        $this->dir = __DIR__;
+        $this->basename = plugin_basename($this->dir);
+        $this->plugin_dir = plugin_dir_path($this->dir);
+        $this->plugin_url = plugin_dir_url($this->dir);
     }
     
     private function bootstrap()

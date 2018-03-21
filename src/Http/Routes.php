@@ -2,7 +2,7 @@
 
 namespace Bonnier\WP\SoMe\Http;
 
-use Bonnier\WP\SoMe\Http\Controllers\InstagramController;
+use Bonnier\WP\SoMe\Http\Controllers\FacebookController;
 use Bonnier\WP\SoMe\Http\Controllers\InstagramOAuthController;
 use Bonnier\WP\SoMe\Http\Controllers\PinterestController;
 use WP_REST_Server;
@@ -13,7 +13,13 @@ class Routes
     
     const PLUGIN_PREFIX = 'bp-some';
     
-    const INSTAGRAM_CALLBACK = 'instagram/callback';
+    const FACEBOOK_CALLBACK = 'facebook/callback';
+    
+    const FACEBOOK_AUTHORIZE = 'facebook/authorize';
+    
+    const FACEBOOK_LOGOUT = 'facebook/logout';
+    
+    const FACEBOOK_OPTIONS = 'facebook/options';
     
     const PINTEREST_CALLBACK = 'pinterest/callback';
     
@@ -32,11 +38,23 @@ class Routes
         }
         
         add_action('rest_api_init', function() {
-            $instagramController = new InstagramController();
+            $facebookController = new FacebookController();
             $pinterestController = new PinterestController();
-            register_rest_route(self::PLUGIN_PREFIX, self::INSTAGRAM_CALLBACK, [
+            register_rest_route(self::PLUGIN_PREFIX, self::FACEBOOK_CALLBACK, [
                 'methods' => WP_REST_Server::READABLE,
-                'callback' => [$instagramController, 'callback'],
+                'callback' => [$facebookController, 'callback'],
+            ]);
+            register_rest_route(self::PLUGIN_PREFIX, self::FACEBOOK_AUTHORIZE, [
+                'methods' => WP_REST_Server::READABLE,
+                'callback' => [$facebookController, 'authorize']
+            ]);
+            register_rest_route(self::PLUGIN_PREFIX, self::FACEBOOK_LOGOUT, [
+                'methods' => WP_REST_Server::READABLE,
+                'callback' => [$facebookController, 'logout']
+            ]);
+            register_rest_route(self::PLUGIN_PREFIX, self::FACEBOOK_OPTIONS, [
+                'methods' => WP_REST_Server::CREATABLE,
+                'callback' => [$facebookController, 'options']
             ]);
             register_rest_route(self::PLUGIN_PREFIX, self::PINTEREST_CALLBACK, [
                 'methods' => WP_REST_Server::READABLE,
@@ -77,13 +95,40 @@ class Routes
         );
     }
     
-    public function getInstagramCallbackRoute($uri = false)
+    public function getFacebookCallbackRoute($uri = false)
     {
         if($uri) {
-            return $this->getUri(self::INSTAGRAM_CALLBACK);
+            return $this->getUri(self::FACEBOOK_CALLBACK);
         }
         
-        return $this->getRoute(self::INSTAGRAM_CALLBACK);
+        return $this->getRoute(self::FACEBOOK_CALLBACK);
+    }
+    
+    public function getFacebookAuthorizeRoute($uri = false)
+    {
+        if($uri) {
+            return $this->getUri(self::FACEBOOK_AUTHORIZE);
+        }
+        
+        return $this->getRoute(self::FACEBOOK_AUTHORIZE);
+    }
+    
+    public function getFacebookLogoutRoute($uri = false)
+    {
+        if($uri) {
+            return $this->getUri(self::FACEBOOK_LOGOUT);
+        }
+        
+        return $this->getRoute(self::FACEBOOK_LOGOUT);
+    }
+    
+    public function getFacebookOptionRoute($uri = false)
+    {
+        if($uri) {
+            return $this->getUri(self::FACEBOOK_OPTIONS);
+        }
+        
+        return $this->getRoute(self::FACEBOOK_OPTIONS);
     }
     
     public function getPinterestCallbackRoute($uri = false)

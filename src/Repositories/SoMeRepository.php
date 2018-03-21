@@ -4,12 +4,12 @@ namespace Bonnier\WP\SoMe\Repositories;
 
 class SoMeRepository
 {
-    private $instagram;
+    private $facebook;
     private $pinterest;
     
     public function __construct()
     {
-        $this->instagram = new InstagramRepository();
+        $this->facebook = new FacebookRepository();
         $this->pinterest = new PinterestRepository();
     }
     
@@ -24,22 +24,15 @@ class SoMeRepository
         }
         
         $pinterest = $this->pinterest->getLatestPins(floor($items/2), $pinterestCursor);
-        
-        // PLACEHOLDER INSTAGRAM //
-        $instagram = new \stdClass();
-        $instagram->data = [];
-        $instagram->page = new \stdClass();
-        $instagram->page->cursor = null;
-        $instagram->page->next = null;
-        // END PLACEHOLDER INSTAGRAM //
+        $instagram = $this->facebook->getLatestInstagramPosts(ceil($items/2), $instagramCursor);
         
         $nextCursor = [];
         
         if($pinterest && isset($pinterest->page)) {
             $nextCursor['pin'] = $pinterest->page->cursor;
         }
-        if($instagram && isset($instagram->page)) {
-            $nextCursor['ins'] = $instagram->page->cursor;
+        if($instagram && isset($instagram->paging)) {
+            $nextCursor['ins'] = $instagram->paging->cursors->after;
         }
         
         return [

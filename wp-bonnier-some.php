@@ -12,6 +12,8 @@ if(!defined('ABSPATH')) {
     exit;
 }
 
+require_once __DIR__ . '/vendor/autoload.php';
+
 spl_autoload_register(function($className){
     $namespace = 'Bonnier\\WP\\SoMe\\';
     if(str_contains($className, $namespace)) {
