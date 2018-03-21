@@ -28,6 +28,10 @@ class ComposerStaticInit8e42a654ef9cafd0869e90367f21bcc4
             'GuzzleHttp\\Promise\\' => 19,
             'GuzzleHttp\\' => 11,
         ),
+        'B' => 
+        array (
+            'Bonnier\\WP\\SoMe\\' => 16,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -50,6 +54,10 @@ class ComposerStaticInit8e42a654ef9cafd0869e90367f21bcc4
         'GuzzleHttp\\' => 
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
+        ),
+        'Bonnier\\WP\\SoMe\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
         ),
     );
 

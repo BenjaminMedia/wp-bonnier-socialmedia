@@ -11,12 +11,12 @@ use WP_REST_Response;
 class OAuthController implements OAuthControllerContract
 {
     /** @var AbstractProvider */
-    private $provider;
+    protected $provider;
     
     /** @var AccessTokenServiceContract */
-    private $accessTokenService;
+    protected $accessTokenService;
     
-    private $homeUri;
+    protected $homeUri;
     
     public function __construct(AbstractProvider $provider, AccessTokenServiceContract $accessTokenService)
     {
@@ -66,7 +66,7 @@ class OAuthController implements OAuthControllerContract
         return $this->redirect($redirectUri);
     }
     
-    protected function isStateValid(string $state): bool
+    protected function isStateValid(string $state = null): bool
     {
         return isset($_SESSION['SoMeState']) &&
             hash_equals($_SESSION['SoMeState'], $state);

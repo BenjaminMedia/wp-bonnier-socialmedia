@@ -5,7 +5,7 @@ namespace Bonnier\WP\SoMe\ResourceOwners;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 use League\OAuth2\Client\Tool\ArrayAccessorTrait;
 
-class InstagramResourceOwner implements ResourceOwnerInterface
+class FacebookResourceOwner implements ResourceOwnerInterface
 {
     use ArrayAccessorTrait;
     
@@ -24,6 +24,11 @@ class InstagramResourceOwner implements ResourceOwnerInterface
     public function getId()
     {
         return $this->getValueByKey($this->response, 'id');
+    }
+    
+    public function getName()
+    {
+        return $this->getValueByKey($this->response, 'name');
     }
     /**
      * Return all of the owner details available as an array.

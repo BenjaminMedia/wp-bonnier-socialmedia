@@ -10,5 +10,5 @@
         "psr-4": {
             "Bonnier\\WP\\SoMe\\": "src/"
         }
-    },
+    }
 }

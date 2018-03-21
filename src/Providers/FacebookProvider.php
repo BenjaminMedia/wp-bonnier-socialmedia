@@ -2,7 +2,7 @@
 
 namespace Bonnier\WP\SoMe\Providers;
 
-use Bonnier\WP\SoMe\ResourceOwners\InstagramResourceOwner;
+use Bonnier\WP\SoMe\ResourceOwners\FacebookResourceOwner;
 use Bonnier\WP\SoMe\SoMe;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
@@ -10,14 +10,16 @@ use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 use League\OAuth2\Client\Token\AccessToken;
 use Psr\Http\Message\ResponseInterface;
 
-class InstagramProvider extends AbstractProvider
+class FacebookProvider extends AbstractProvider
 {
     private $endpoint;
+    private $graphUrl;
     
     public function __construct()
     {
-        $this->endpoint = '';
-        $client = SoMe::instance()->getSettings()->getInstagramClient();
+        $this->endpoint = 'https://www.facebook.com/v2.12/';
+        $this->graphUrl = 'https://graph.facebook.com/v2.12/';
+        $client = SoMe::instance()->getSettings()->getFacebookClient();
         
         parent::__construct([
             'clientId' => $client['client_id'],
@@ -36,7 +38,7 @@ class InstagramProvider extends AbstractProvider
      */
     public function getBaseAuthorizationUrl()
     {
-        // TODO: Implement getBaseAuthorizationUrl() method.
+        return $this->endpoint . 'dialog/oauth';
     }
     
     /**
@@ -49,7 +51,7 @@ class InstagramProvider extends AbstractProvider
      */
     public function getBaseAccessTokenUrl(array $params)
     {
-        // TODO: Implement getBaseAccessTokenUrl() method.
+        return $this->graphUrl . 'oauth/access_token';
     }
     
     /**
@@ -60,7 +62,7 @@ class InstagramProvider extends AbstractProvider
      */
     public function getResourceOwnerDetailsUrl(AccessToken $token)
     {
-        // TODO: Implement getResourceOwnerDetailsUrl() method.
+        return $this->graphUrl . 'me?access_token=' . $token->getToken();
     }
     
     /**
@@ -73,7 +75,7 @@ class InstagramProvider extends AbstractProvider
      */
     protected function getDefaultScopes()
     {
-        // TODO: Implement getDefaultScopes() method.
+        return ['manage_pages', 'instagram_basic'];
     }
     
     /**
@@ -105,6 +107,6 @@ class InstagramProvider extends AbstractProvider
      */
     protected function createResourceOwner(array $response, AccessToken $token)
     {
-        return new InstagramResourceOwner($response);
+        return new FacebookResourceOwner($response);
     }
 }

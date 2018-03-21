@@ -2,9 +2,10 @@
 
 namespace Bonnier\WP\SoMe\Settings;
 
-use Bonnier\WP\SoMe\Providers\InstagramProvider;
+use Bonnier\WP\SoMe\Providers\FacebookProvider;
 use Bonnier\WP\SoMe\Providers\PinterestProvider;
-use Bonnier\WP\SoMe\Services\InstagramAccessTokenService;
+use Bonnier\WP\SoMe\Repositories\FacebookRepository;
+use Bonnier\WP\SoMe\Services\FacebookAccessTokenService;
 use Bonnier\WP\SoMe\Services\PinterestAccessTokenService;
 use Bonnier\WP\SoMe\SoMe;
 
@@ -15,19 +16,20 @@ class SettingsPage
     const SETTINGS_SECTION = 'bp_some_settings_section';
     const SETTINGS_PAGE = 'bp_some_settings_page';
     const NOTICE_PREFIX = 'Bonnier SoMe: ';
+    const INSTAGRAM_ID = 'bp_some_instagram_id';
     
-    private $igSettingsFields = [
-        'ig_client_id' => [
+    private $fbSettingsFields = [
+        'fb_client_id' => [
             'type' => 'text',
-            'name' => 'Instagram Client ID'
+            'name' => 'Facebook Client ID'
         ],
-        'ig_client_secret' => [
-            'type' => 'text',
-            'name' => 'Instagram Client Secret'
+        'fb_client_secret' => [
+            'type' => 'password',
+            'name' => 'Facebook Client Secret'
         ],
-        'ig_redirect_uri' => [
+        'fb_redirect_uri' => [
             'type' => 'text',
-            'name' => 'Instagram OAuth Redirect URI',
+            'name' => 'Facebook OAuth Redirect URI',
             'value' => '',
             'readonly' => true
         ]
@@ -39,7 +41,7 @@ class SettingsPage
             'name' => 'Pinterest App ID'
         ],
         'pt_client_secret' => [
-            'type' => 'text',
+            'type' => 'password',
             'name' => 'Pinterest App Secret'
         ],
         'pt_redirect_uri' => [
@@ -57,12 +59,13 @@ class SettingsPage
         $this->settingsValues = get_option(self::SETTINGS_KEY);
         add_action('admin_menu', [$this, 'add_plugin_page']);
         add_action('admin_init', [$this, 'register_settings']);
+        
         add_action('bp_some_loaded', [$this, 'bootstrap']);
     }
     
     public function bootstrap()
     {
-        $this->igSettingsFields['ig_redirect_uri']['value'] = SoMe::instance()->getRoutes()->getInstagramCallbackRoute($uri = true);
+        $this->fbSettingsFields['fb_redirect_uri']['value'] = SoMe::instance()->getRoutes()->getFacebookCallbackRoute($uri = true);
         $this->ptSettingsFields['pt_redirect_uri']['value'] = SoMe::instance()->getRoutes()->getPinterestCallbackRoute($uri = true);
     }
     
@@ -81,6 +84,11 @@ class SettingsPage
     {
         ?>
         <div class="wrap">
+            <?php
+            if($error = $_GET['error'] ?? null) {
+                $this->print_error($error);
+            }
+            ?>
             <form method="post" action="options.php">
                 <?php
                 // This prints out all hidden setting fields
@@ -90,51 +98,8 @@ class SettingsPage
                 ?>
             </form>
             <?php
-            $redirectUri = urlencode($this->getCurrentUrl());
-            if($this->getInstagramClientID() && $this->getInstagramClientSecret()) {
-                ?>
-                <div>
-                    <h3>Connect with Instagram</h3>
-                    <?php
-                    if ($instaAccessToken = with(new InstagramAccessTokenService())->get()) {
-                        $instaUser = with(new InstagramProvider())->getResourceOwner($instaAccessToken);
-                        ?>
-                        <p>Logged into Instagram as <a href="<?php echo $instaUser->getUrl(); ?>"
-                                                       target="_blank"><?php echo $instaUser->getName(); ?></a></p>
-                        <?php
-                    } else {
-                        $instaAuth = SoMe::instance()->getRoutes()->getInstagramCallbackRoute($uri = true);
-                        ?>
-                        <a href="<?php echo $instaAuth . '?redirect_uri=' . $redirectUri; ?>" class="button">Click here to connect with Instagram</a>
-                        <?php
-                    }
-                    ?>
-                </div>
-                <?php
-            }
-            if($this->getPinterestClientID() && $this->getPinterestClientSecret()) {
-                ?>
-                <div>
-                    <h3>Connect with Pinterest</h3>
-                    <?php
-                    if ($pinAccessToken = with(new PinterestAccessTokenService())->get()) {
-                        $pinUser = with(new PinterestProvider())->getResourceOwner($pinAccessToken);
-                        $logout = SoMe::instance()->getRoutes()->getPinterestLogoutRoute();
-                        ?>
-                        <p>Logged into Pinterest as <a href="<?php echo $pinUser->getUrl(); ?>"
-                                                       target="_blank"><?php echo $pinUser->getFirstName(); ?></a></p>
-                        <p><a href="<?php echo $logout . '?redirect_uri=' . $redirectUri; ?>" class="button button-secondary">Click here to log out of Pinterest</a></p>
-                        <?php
-                    } else {
-                        $pinAuth = SoMe::instance()->getRoutes()->getPinterestAuthorizeRoute($uri = true);
-                        ?>
-                        <a href="<?php echo $pinAuth . '?redirect_uri=' . $redirectUri; ?>" class="button button-primary">Click here to connect with Pinterest</a>
-                        <?php
-                    }
-                    ?>
-                </div>
-                <?php
-            }
+            $this->renderFacebook();
+            $this->renderPinterest();
             ?>
         </div>
         <?php
@@ -153,19 +118,19 @@ class SettingsPage
         );
         
         add_settings_section(
-                self::SETTINGS_SECTION . '_IG',
-                'Bonnier SoMe Settings<hr />Instagram Settings',
-                [$this, 'print_ig_section_info'],
+                self::SETTINGS_SECTION . '_FB',
+                'Bonnier SoMe Settings<hr />Facebook (Instagram) Settings',
+                [$this, 'print_fb_section_info'],
                 self::SETTINGS_PAGE
         );
         
-        foreach ($this->igSettingsFields as $sKey => $sField) {
+        foreach ($this->fbSettingsFields as $sKey => $sField) {
             add_settings_field(
                 $sKey, // ID
                 $sField['name'], // Title
                 [$this, $sKey], // Callback
                 self::SETTINGS_PAGE, // Page
-                self::SETTINGS_SECTION . '_IG' // Section
+                self::SETTINGS_SECTION . '_FB' // Section
             );
         }
         
@@ -191,7 +156,7 @@ class SettingsPage
     {
         $sanitizedInput = [];
         
-        foreach (array_merge($this->igSettingsFields, $this->ptSettingsFields) as $sKey => $sField) {
+        foreach (array_merge($this->fbSettingsFields, $this->ptSettingsFields) as $sKey => $sField) {
             if (isset($input[$sKey])) {
                 if ($sField['type'] === 'checkbox') {
                     $sanitizedInput[$sKey] = absint($input[$sKey]);
@@ -205,9 +170,9 @@ class SettingsPage
         return $sanitizedInput;
     }
     
-    public function print_ig_section_info()
+    public function print_fb_section_info()
     {
-        print 'Create an Instagram app and enter settings below:';
+        print 'Create a Facebook app and enter settings below:';
     }
     
     public function print_pt_section_info()
@@ -217,36 +182,36 @@ class SettingsPage
     
     public function __call($function, $arguments)
     {
-        if(!isset($this->igSettingsFields[$function]) && !isset($this->ptSettingsFields[$function])) {
+        if(!isset($this->fbSettingsFields[$function]) && !isset($this->ptSettingsFields[$function])) {
             return false;
         }
         
-        $field = $this->igSettingsFields[$function] ?? $this->ptSettingsFields[$function];
+        $field = $this->fbSettingsFields[$function] ?? $this->ptSettingsFields[$function];
         $this->create_settings_field($field, $function);
     }
     
-    public function getInstagramClient($locale = null)
+    public function getFacebookClient($locale = null)
     {
         return [
-            'client_id' => $this->get_setting_value('ig_client_id', $locale),
-            'client_secret' => $this->get_setting_value('ig_client_secret', $locale),
-            'redirect_uri' => $this->get_setting_value('ig_redirect_uri', $locale)
+            'client_id' => $this->get_setting_value('fb_client_id', $locale),
+            'client_secret' => $this->get_setting_value('fb_client_secret', $locale),
+            'redirect_uri' => $this->get_setting_value('fb_redirect_uri', $locale)
         ];
     }
     
-    public function getInstagramClientID($locale = null)
+    public function getFacebookClientID($locale = null)
     {
-        return $this->get_setting_value('ig_client_id', $locale);
+        return $this->get_setting_value('fb_client_id', $locale);
     }
     
-    public function getInstagramClientSecret($locale = null)
+    public function getFacebookClientSecret($locale = null)
     {
-        return $this->get_setting_value('ig_client_secret', $locale);
+        return $this->get_setting_value('fb_client_secret', $locale);
     }
     
-    public function getInstagramRedirectUri($locale = null)
+    public function getFacebookRedirectUri($locale = null)
     {
-        return $this->get_setting_value('ig_redirect_uri', $locale);
+        return $this->get_setting_value('fb_redirect_uri', $locale);
     }
     
     /**
@@ -310,15 +275,15 @@ class SettingsPage
     
     private function enable_language_fields()
     {
-        $languageEnabledFieldsIG = [];
+        $languageEnabledFieldsFB = [];
         $languageEnabledFieldsPT = [];
         
         foreach ($this->get_languages() as $language) {
-            foreach ($this->igSettingsFields as $fieldKey => $settingsField) {
+            foreach ($this->fbSettingsFields as $fieldKey => $settingsField) {
                 $localeFieldKey = $language->locale . '_' . $fieldKey;
-                $languageEnabledFieldsIG[$localeFieldKey] = $settingsField;
-                $languageEnabledFieldsIG[$localeFieldKey]['name'] .= ' ' . $language->locale;
-                $languageEnabledFieldsIG[$localeFieldKey]['locale'] = $language->locale;
+                $languageEnabledFieldsFB[$localeFieldKey] = $settingsField;
+                $languageEnabledFieldsFB[$localeFieldKey]['name'] .= ' ' . $language->locale;
+                $languageEnabledFieldsFB[$localeFieldKey]['locale'] = $language->locale;
             }
             foreach ($this->ptSettingsFields as $fieldKey => $settingsField) {
                 $localeFieldKey = $language->locale . '_' . $fieldKey;
@@ -328,7 +293,7 @@ class SettingsPage
             }
         }
         
-        $this->igSettingsFields = $languageEnabledFieldsIG;
+        $this->fbSettingsFields = $languageEnabledFieldsFB;
         $this->ptSettingsFields = $languageEnabledFieldsPT;
         
     }
@@ -400,6 +365,14 @@ class SettingsPage
             }
             $fieldOutput = sprintf('<input type="text" name="%s" value="%s" %s class="regular-text" />', $fieldName, $fieldValue, $readonly);
         }
+        if ($field['type'] === 'password') {
+            $fieldValue = isset($this->settingsValues[$fieldKey]) ? esc_attr($this->settingsValues[$fieldKey]) : ($field['value'] ?? '');
+            $readonly = null;
+            if($field['readonly'] ?? false) {
+                $readonly = 'readonly="readonly"';
+            }
+            $fieldOutput = sprintf('<input type="password" name="%s" value="%s" %s class="regular-text" />', $fieldName, $fieldValue, $readonly);
+        }
         if ($field['type'] === 'checkbox') {
             $checked = isset($this->settingsValues[$fieldKey]) && $this->settingsValues[$fieldKey] ? 'checked' : '';
             $fieldOutput = "<input type='hidden' value='0' name='$fieldName'>";
@@ -418,6 +391,87 @@ class SettingsPage
         
         if ($fieldOutput) {
             print $fieldOutput;
+        }
+    }
+    
+    private function renderFacebook()
+    {
+        if($this->getFacebookClientID() && $this->getFacebookClientSecret()) {
+            ?>
+            <div>
+                <h3>Connect with Facebook (Instagram)</h3>
+                <?php
+                if ($fbAccessToken = with(new FacebookAccessTokenService())->get()) {
+                    $fbUser = with(new FacebookProvider())->getResourceOwner($fbAccessToken);
+                    $logout = SoMe::instance()->getRoutes()->getFacebookLogoutRoute($uri = true);
+                    ?>
+                    <p>Logged into Facebook as <strong><?php echo $fbUser->getName(); ?></strong></p>
+                    <p><a href="<?php echo $logout . '?redirect_uri=' . urlencode($this->getCurrentUrl()); ?>" class="button button-secondary">Click here to log out of Facebook</a></p>
+                    <?php
+                    $this->renderInstagramAccountSelector();
+                } else {
+                    $fbAuth = SoMe::instance()->getRoutes()->getFacebookAuthorizeRoute($uri = true);
+                    ?>
+                    <a href="<?php echo $fbAuth . '?redirect_uri=' . urlencode($this->getCurrentUrl()); ?>" class="button">Click here to connect with Facebook (Instagram)</a>
+                    <?php
+                }
+                ?>
+            </div>
+            <?php
+        }
+    }
+    
+    private function renderInstagramAccountSelector()
+    {
+        $accounts = with(new FacebookRepository())->getInstagramAccounts();
+        $instagramID = get_option(self::INSTAGRAM_ID);
+        if($instagramID) {
+            echo sprintf('<h4>Instagram ID: %s</h4>', $instagramID);
+        } else {
+            echo '<h4>No Instagram account selected</h4>';
+        }
+        if(!empty($accounts)) {
+            echo sprintf('<form method="post" action="%s">', SoMe::instance()->getRoutes()->getFacebookOptionRoute());
+            echo '<input type="hidden" name="option" value="instagram_account" />';
+            echo sprintf('<input type="hidden" name="redirect_uri" value="%s" />', $this->getCurrentUrl());
+            echo '<fieldset><legend>Select Instagram Account</legend>';
+            echo '<select name="instagram_account_id" style="min-width: 20%;">';
+            echo '<option>SELECT ACCOUNT</option>';
+            foreach ($accounts as $account) {
+                echo sprintf('<option value="%s">%s</option>', $account['id'], $account['name']);
+            }
+            echo '</select>';
+            echo '<br /><br />';
+            echo '<button type="submit" class="button button-primary">Save Selected Instagram Account</button>';
+            echo '</fieldset>';
+            echo '</form>';
+        }
+    }
+    
+    private function renderPinterest()
+    {
+        if($this->getPinterestClientID() && $this->getPinterestClientSecret()) {
+            ?>
+            <div>
+                <h3>Connect with Pinterest</h3>
+                <?php
+                if ($pinAccessToken = with(new PinterestAccessTokenService())->get()) {
+                    $pinUser = with(new PinterestProvider())->getResourceOwner($pinAccessToken);
+                    $logout = SoMe::instance()->getRoutes()->getPinterestLogoutRoute();
+                    ?>
+                    <p>Logged into Pinterest as <a href="<?php echo $pinUser->getUrl(); ?>"
+                                                   target="_blank"><?php echo $pinUser->getFirstName(); ?></a></p>
+                    <p><a href="<?php echo $logout . '?redirect_uri=' . urlencode($this->getCurrentUrl()); ?>" class="button button-secondary">Click here to log out of Pinterest</a></p>
+                    <?php
+                } else {
+                    $pinAuth = SoMe::instance()->getRoutes()->getPinterestAuthorizeRoute($uri = true);
+                    ?>
+                    <a href="<?php echo $pinAuth . '?redirect_uri=' . urlencode($this->getCurrentUrl()); ?>" class="button button-primary">Click here to connect with Pinterest</a>
+                    <?php
+                }
+                ?>
+            </div>
+            <?php
         }
     }
 }
