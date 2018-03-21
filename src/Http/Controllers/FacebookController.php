@@ -15,6 +15,17 @@ class FacebookController extends OAuthController
         parent::__construct(new FacebookProvider(), new FacebookAccessTokenService());
     }
     
+    public function logout(WP_REST_Request $request): WP_REST_Response
+    {
+        $this->accessTokenService->delete();
+        
+        delete_option(SettingsPage::INSTAGRAM_ID);
+        
+        $redirectUri = $request->get_param('redirect_uri') ?? $this->homeUri;
+        
+        return $this->redirect($redirectUri);
+    }
+    
     public function options(WP_REST_Request $request): WP_REST_Response
     {
         $currentUser = wp_get_current_user();

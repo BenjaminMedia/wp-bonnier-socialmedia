@@ -403,8 +403,10 @@ class SettingsPage
                 <?php
                 if ($fbAccessToken = with(new FacebookAccessTokenService())->get()) {
                     $fbUser = with(new FacebookProvider())->getResourceOwner($fbAccessToken);
+                    $logout = SoMe::instance()->getRoutes()->getFacebookLogoutRoute($uri = true);
                     ?>
                     <p>Logged into Facebook as <strong><?php echo $fbUser->getName(); ?></strong></p>
+                    <p><a href="<?php echo $logout . '?redirect_uri=' . urlencode($this->getCurrentUrl()); ?>" class="button button-secondary">Click here to log out of Facebook</a></p>
                     <?php
                     $this->renderInstagramAccountSelector();
                 } else {
