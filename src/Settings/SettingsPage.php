@@ -8,6 +8,7 @@ use Bonnier\WP\SoMe\Repositories\FacebookRepository;
 use Bonnier\WP\SoMe\Services\FacebookAccessTokenService;
 use Bonnier\WP\SoMe\Services\PinterestAccessTokenService;
 use Bonnier\WP\SoMe\SoMe;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 
 class SettingsPage
 {
@@ -161,7 +162,7 @@ class SettingsPage
                 if ($sField['type'] === 'checkbox') {
                     $sanitizedInput[$sKey] = absint($input[$sKey]);
                 }
-                if ($sField['type'] === 'text' || $sField['type'] === 'select') {
+                if (in_array($sField['type'], ['text', 'select', 'password'])) {
                     $sanitizedInput[$sKey] = sanitize_text_field($input[$sKey]);
                 }
             }
@@ -402,13 +403,23 @@ class SettingsPage
                 <h3>Connect with Facebook (Instagram)</h3>
                 <?php
                 if ($fbAccessToken = with(new FacebookAccessTokenService())->get()) {
-                    $fbUser = with(new FacebookProvider())->getResourceOwner($fbAccessToken);
                     $logout = SoMe::instance()->getRoutes()->getFacebookLogoutRoute($uri = true);
-                    ?>
-                    <p>Logged into Facebook as <strong><?php echo $fbUser->getName(); ?></strong></p>
-                    <p><a href="<?php echo $logout . '?redirect_uri=' . urlencode($this->getCurrentUrl()); ?>" class="button button-secondary">Click here to log out of Facebook</a></p>
-                    <?php
-                    $this->renderInstagramAccountSelector();
+                    try {
+                        $fbUser = with(new FacebookProvider())->getResourceOwner($fbAccessToken);
+                        ?>
+                        <p>Logged into Facebook as <strong><?php echo $fbUser->getName(); ?></strong></p>
+                        <p><a href="<?php echo $logout . '?redirect_uri=' . urlencode($this->getCurrentUrl()); ?>"
+                              class="button button-secondary">Click here to log out of Facebook</a></p>
+                        <?php
+                        $this->renderInstagramAccountSelector();
+                    } catch(IdentityProviderException $e) {
+                        ?>
+                        <script type="text/javascript">
+                            window.location="<?php echo $logout . '?redirect_uri=' . urlencode($this->getCurrentUrl()); ?>";
+                        </script>
+                        <?php
+                        wp_die();
+                    }
                 } else {
                     $fbAuth = SoMe::instance()->getRoutes()->getFacebookAuthorizeRoute($uri = true);
                     ?>
@@ -456,13 +467,23 @@ class SettingsPage
                 <h3>Connect with Pinterest</h3>
                 <?php
                 if ($pinAccessToken = with(new PinterestAccessTokenService())->get()) {
-                    $pinUser = with(new PinterestProvider())->getResourceOwner($pinAccessToken);
                     $logout = SoMe::instance()->getRoutes()->getPinterestLogoutRoute();
-                    ?>
-                    <p>Logged into Pinterest as <a href="<?php echo $pinUser->getUrl(); ?>"
-                                                   target="_blank"><?php echo $pinUser->getFirstName(); ?></a></p>
-                    <p><a href="<?php echo $logout . '?redirect_uri=' . urlencode($this->getCurrentUrl()); ?>" class="button button-secondary">Click here to log out of Pinterest</a></p>
-                    <?php
+                    try {
+                        $pinUser = with(new PinterestProvider())->getResourceOwner($pinAccessToken);
+                        ?>
+                        <p>Logged into Pinterest as <a href="<?php echo $pinUser->getUrl(); ?>"
+                                                       target="_blank"><?php echo $pinUser->getFirstName(); ?></a></p>
+                        <p><a href="<?php echo $logout . '?redirect_uri=' . urlencode($this->getCurrentUrl()); ?>"
+                              class="button button-secondary">Click here to log out of Pinterest</a></p>
+                        <?php
+                    } catch(IdentityProviderException $e) {
+                        ?>
+                        <script type="text/javascript">
+                          window.location="<?php echo $logout . '?redirect_uri=' . urlencode($this->getCurrentUrl()); ?>";
+                        </script>
+                        <?php
+                        wp_die();
+                    }
                 } else {
                     $pinAuth = SoMe::instance()->getRoutes()->getPinterestAuthorizeRoute($uri = true);
                     ?>

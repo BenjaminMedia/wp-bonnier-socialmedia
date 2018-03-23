@@ -28,19 +28,21 @@ class SoMeRepository
         
         $nextCursor = [];
         
-        if($pinterest && isset($pinterest->page)) {
+        $response = [
+            'feed' => []
+        ];
+        
+        if($pinterest) {
+            $response['feed']['pinterest'] = $pinterest->data ?? [];
             $nextCursor['pin'] = $pinterest->page->cursor;
         }
-        if($instagram && isset($instagram->paging)) {
+        if($instagram) {
+            $response['feed']['instagram'] = $instagram->data ?? [];
             $nextCursor['ins'] = $instagram->paging->cursors->after;
         }
         
-        return [
-            'feed' => [
-                'pinterest' => $pinterest->data ?? [],
-                'instagram' => $instagram->data ?? [],
-            ],
-            'cursor' => base64_encode(serialize($nextCursor))
-        ];
+        $response['cursor'] = base64_encode(serialize($nextCursor));
+        
+        return $response;
     }
 }
