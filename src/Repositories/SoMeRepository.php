@@ -19,8 +19,8 @@ class SoMeRepository
         $instagramCursor = null;
         if($cursor) {
             $cursors = unserialize(base64_decode($cursor));
-            $pinterestCursor = $cursors['pin'];
-            $instagramCursor = $cursors['ins'];
+            $pinterestCursor = $cursors['pin'] ?? null;
+            $instagramCursor = $cursors['ins'] ?? null;
         }
         
         $pinterest = $this->pinterest->getLatestPins(floor($items/2), $pinterestCursor);
