@@ -17,14 +17,22 @@ class SoMeRepository
     {
         $pinterestCursor = null;
         $instagramCursor = null;
-        if($cursor) {
+        if ($cursor) {
             $cursors = unserialize(base64_decode($cursor));
             $pinterestCursor = $cursors['pin'] ?? null;
             $instagramCursor = $cursors['ins'] ?? null;
         }
-        
-        $pinterest = $this->pinterest->getLatestPins(floor($items/2), $pinterestCursor);
-        $instagram = $this->facebook->getLatestInstagramPosts(ceil($items/2), $instagramCursor);
+
+        $pinterest = $instagram = null;
+
+        if ($this->pinterest->isActive() && $this->facebook->isActive()) {
+            $pinterest = $this->pinterest->getLatestPins(floor($items / 2), $pinterestCursor);
+            $instagram = $this->facebook->getLatestInstagramPosts(ceil($items / 2), $instagramCursor);
+        } elseif ($this->pinterest->isActive()) {
+            $pinterest = $this->pinterest->getLatestPins($items, $pinterestCursor);
+        } else {
+            $instagram = $this->facebook->getLatestInstagramPosts($items, $instagramCursor);
+        }
         
         $nextCursor = [];
         
@@ -32,11 +40,11 @@ class SoMeRepository
             'feed' => []
         ];
         
-        if($pinterest) {
+        if ($pinterest) {
             $response['feed']['pinterest'] = $pinterest->data ?? [];
             $nextCursor['pin'] = $pinterest->page->cursor;
         }
-        if($instagram) {
+        if ($instagram) {
             $response['feed']['instagram'] = $instagram->data ?? [];
             $nextCursor['ins'] = $instagram->paging->cursors->after;
         }
