@@ -36,6 +36,9 @@ class Routes
         } else {
             $this->homeUrl = preg_replace('#^http://#', 'https://', home_url('/'));
         }
+        if(substr($this->homeUrl, 0, 11) !== 'https://api') {
+            $this->homeUrl = str_replace('https://', 'https://api.', $this->homeUrl);
+        }
         
         add_action('rest_api_init', function() {
             $facebookController = new FacebookController();
