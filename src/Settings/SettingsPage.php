@@ -263,11 +263,11 @@ class SettingsPage
         if(!$this->settingsValues) {
             $this->settingsValues = get_option(self::SETTINGS_KEY);
         }
-        
+
         if ($locale) {
             $settingKey = $locale . '_' . $settingKey;
         }
-        
+
         if (isset($this->settingsValues[$settingKey]) && !empty($this->settingsValues[$settingKey])) {
             return $this->settingsValues[$settingKey];
         }
@@ -320,7 +320,11 @@ class SettingsPage
     private function get_current_language()
     {
         if ($this->languages_is_enabled()) {
-            return PLL()->model->get_language(pll_current_language());
+            if ($language = PLL()->model->get_language(pll_current_language())) {
+                return $language;
+            } else {
+                return PLL()->model->get_language(pll_default_language());
+            }
         }
         return null;
     }

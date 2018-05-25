@@ -18,7 +18,7 @@ class PinterestRepository extends BaseRepository
             'fields' => $fields
         ];
 
-        if($cursor) {
+        if ($cursor) {
             $query['cursor'] = $cursor;
         }
         

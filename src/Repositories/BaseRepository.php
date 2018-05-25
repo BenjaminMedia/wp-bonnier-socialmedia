@@ -9,10 +9,15 @@ use League\OAuth2\Client\Token\AccessToken;
 class BaseRepository implements RepositoryContract
 {
     protected $client;
+    protected $active;
     
     public function __construct(string $base_uri, AccessToken $accessToken = null)
     {
-        $this->client = $this->createClient($base_uri, $accessToken);
+        $this->active = false;
+        if ($accessToken && $accessToken->getToken()) {
+            $this->active = true;
+            $this->client = $this->createClient($base_uri, $accessToken);
+        }
     }
     
     public function createClient(string $base_uri, AccessToken $accessToken = null): Client
@@ -23,8 +28,8 @@ class BaseRepository implements RepositoryContract
                 'Accept' => 'application/json'
             ],
         ];
-        /** @var AccessToken $accessToken */
-        if($accessToken) {
+        
+        if ($accessToken) {
             $config['headers'] = [
                 'Authorization' => 'Bearer ' . $accessToken->getToken()
             ];
@@ -39,12 +44,12 @@ class BaseRepository implements RepositoryContract
             $response = $this->client->get($uri, [
                 'query' => $query
             ]);
-        } catch(ClientException $e) {
+        } catch (ClientException $e) {
             return null;
         }
     
         $result = json_decode($response->getBody()->getContents());
-        if(json_last_error() === JSON_ERROR_NONE) {
+        if (json_last_error() === JSON_ERROR_NONE) {
             return $result;
         }
     
@@ -57,15 +62,20 @@ class BaseRepository implements RepositoryContract
             $response = $this->client->post($uri, [
                 'params' => $params,
             ]);
-        } catch(ClientException $e) {
+        } catch (ClientException $e) {
             return null;
         }
         
         $result = json_decode($response->getBody()->getContents());
-        if(json_last_error() === JSON_ERROR_NONE) {
+        if (json_last_error() === JSON_ERROR_NONE) {
             return $result;
         }
         
         return null;
+    }
+
+    public function isActive()
+    {
+        return $this->active;
     }
 }
