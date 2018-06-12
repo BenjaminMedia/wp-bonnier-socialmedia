@@ -64,12 +64,6 @@ class SettingsPage
         add_action('bp_some_loaded', [$this, 'bootstrap']);
     }
     
-    public function bootstrap()
-    {
-        $this->fbSettingsFields['fb_redirect_uri']['value'] = SoMe::instance()->getRoutes()->getFacebookCallbackRoute($uri = true);
-        $this->ptSettingsFields['pt_redirect_uri']['value'] = SoMe::instance()->getRoutes()->getPinterestCallbackRoute($uri = true);
-    }
-    
     public function add_plugin_page()
     {
         add_options_page(
@@ -285,12 +279,22 @@ class SettingsPage
                 $languageEnabledFieldsFB[$localeFieldKey] = $settingsField;
                 $languageEnabledFieldsFB[$localeFieldKey]['name'] .= ' ' . $language->locale;
                 $languageEnabledFieldsFB[$localeFieldKey]['locale'] = $language->locale;
+                if ($fieldKey === 'fb_redirect_uri') {
+                    $languageEnabledFieldsFB[$localeFieldKey]['value'] = SoMe::instance()->
+                    getRoutes()->
+                    getFacebookCallbackRoute($uri = true);
+                }
             }
             foreach ($this->ptSettingsFields as $fieldKey => $settingsField) {
                 $localeFieldKey = $language->locale . '_' . $fieldKey;
                 $languageEnabledFieldsPT[$localeFieldKey] = $settingsField;
                 $languageEnabledFieldsPT[$localeFieldKey]['name'] .= ' ' . $language->locale;
                 $languageEnabledFieldsPT[$localeFieldKey]['locale'] = $language->locale;
+                if ($fieldKey === 'pt_redirect_uri') {
+                    $languageEnabledFieldsPT[$localeFieldKey]['value'] = SoMe::instance()->
+                    getRoutes()->
+                    getFacebookCallbackRoute($uri = true);
+                }
             }
         }
         
