@@ -190,7 +190,7 @@ class SettingsPage
         return [
             'client_id' => $this->get_setting_value('fb_client_id', $locale),
             'client_secret' => $this->get_setting_value('fb_client_secret', $locale),
-            'redirect_uri' => $this->get_setting_value('fb_redirect_uri', $locale)
+            'redirect_uri' => SoMe::instance()->getRoutes()->getFacebookCallbackRoute(true)
         ];
     }
     
@@ -222,7 +222,7 @@ class SettingsPage
         return [
             'client_id' => $this->get_setting_value('pt_client_id', $locale),
             'client_secret' => $this->get_setting_value('pt_client_secret', $locale),
-            'redirect_uri' => $this->get_setting_value('pt_redirect_uri', $locale),
+            'redirect_uri' => SoMe::instance()->getRoutes()->getPinterestCallbackRoute(true),
         ];
     }
     
