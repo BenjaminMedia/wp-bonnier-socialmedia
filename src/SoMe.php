@@ -18,10 +18,10 @@ class SoMe
     private $basename;
     
     /** @var string Plugins directory for this plugin */
-    private $plugin_dir;
+    private $pluginDir;
     
     /** @var string Plugins url for this plugin */
-    private $plugin_url;
+    private $pluginUrl;
     
     private $settings;
     private $routes;
@@ -32,7 +32,7 @@ class SoMe
      */
     public static function instance()
     {
-        if(self::$instance === null) {
+        if (self::$instance === null) {
             self::$instance = new self;
             self::$instance->bootstrap();
             do_action('bp_some_loaded');
@@ -63,24 +63,25 @@ class SoMe
     {
         return $this->soMeRepo;
     }
-    
+
+    public function bootstrap()
+    {
+        $this->routes = new Routes();
+        $this->settings = new SettingsPage();
+        $this->soMeRepo = new SoMeRepository();
+
+        if (!session_id()) {
+            session_start();
+        }
+    }
+
     private function __construct()
     {
         // Set plugin file variables
         $this->dir = __DIR__;
         $this->basename = plugin_basename($this->dir);
-        $this->plugin_dir = plugin_dir_path($this->dir);
-        $this->plugin_url = plugin_dir_url($this->dir);
+        $this->pluginDir = plugin_dir_path($this->dir);
+        $this->pluginUrl = plugin_dir_url($this->dir);
     }
-    
-    private function bootstrap()
-    {
-        $this->routes = new Routes();
-        $this->settings = new SettingsPage();
-        $this->soMeRepo = new SoMeRepository();
-    
-        if(!session_id()) {
-            session_start();
-        }
-    }
+
 }

@@ -3,7 +3,6 @@
 namespace Bonnier\WP\SoMe\Http;
 
 use Bonnier\WP\SoMe\Http\Controllers\FacebookController;
-use Bonnier\WP\SoMe\Http\Controllers\InstagramOAuthController;
 use Bonnier\WP\SoMe\Http\Controllers\PinterestController;
 use WP_REST_Server;
 
@@ -31,16 +30,16 @@ class Routes
     
     public function __construct()
     {
-        if(function_exists('pll_home_url')) {
+        if (function_exists('pll_home_url')) {
             $this->homeUrl = preg_replace('#^http://#', 'https://', pll_home_url());
         } else {
             $this->homeUrl = preg_replace('#^http://#', 'https://', home_url('/'));
         }
-        if(substr($this->homeUrl, 0, 11) !== 'https://api') {
+        if (substr($this->homeUrl, 0, 11) !== 'https://api') {
             $this->homeUrl = str_replace('https://', 'https://api.', $this->homeUrl);
         }
         
-        add_action('rest_api_init', function() {
+        add_action('rest_api_init', function () {
             $facebookController = new FacebookController();
             $pinterestController = new PinterestController();
             register_rest_route(self::PLUGIN_PREFIX, self::FACEBOOK_CALLBACK, [
@@ -83,7 +82,7 @@ class Routes
     {
         return sprintf(
             '%s/%s',
-            trim($this->homeUrl,'/'),
+            trim($this->homeUrl, '/'),
             trim($this->getRoute($route), '/')
         );
     }
@@ -100,7 +99,7 @@ class Routes
     
     public function getFacebookCallbackRoute($uri = false)
     {
-        if($uri) {
+        if ($uri) {
             return $this->getUri(self::FACEBOOK_CALLBACK);
         }
         
@@ -109,7 +108,7 @@ class Routes
     
     public function getFacebookAuthorizeRoute($uri = false)
     {
-        if($uri) {
+        if ($uri) {
             return $this->getUri(self::FACEBOOK_AUTHORIZE);
         }
         
@@ -118,7 +117,7 @@ class Routes
     
     public function getFacebookLogoutRoute($uri = false)
     {
-        if($uri) {
+        if ($uri) {
             return $this->getUri(self::FACEBOOK_LOGOUT);
         }
         
@@ -127,7 +126,7 @@ class Routes
     
     public function getFacebookOptionRoute($uri = false)
     {
-        if($uri) {
+        if ($uri) {
             return $this->getUri(self::FACEBOOK_OPTIONS);
         }
         
@@ -136,7 +135,7 @@ class Routes
     
     public function getPinterestCallbackRoute($uri = false)
     {
-        if($uri) {
+        if ($uri) {
             return $this->getUri(self::PINTEREST_CALLBACK);
         }
         
@@ -145,7 +144,7 @@ class Routes
     
     public function getPinterestAuthorizeRoute($uri = false)
     {
-        if($uri) {
+        if ($uri) {
             return $this->getUri(self::PINTEREST_AUTHORIZE);
         }
         
@@ -154,7 +153,7 @@ class Routes
     
     public function getPinterestLogoutRoute($uri = false)
     {
-        if($uri) {
+        if ($uri) {
             return $this->getUri(self::PINTEREST_LOGOUT);
         }
         

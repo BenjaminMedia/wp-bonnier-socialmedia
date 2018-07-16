@@ -23,7 +23,7 @@ class AccessTokenService implements AccessTokenServiceContract
      */
     public function get(): ?AccessToken
     {
-        if($storedToken = get_option($this->accessTokenStoreKey)) {
+        if ($storedToken = get_option($this->accessTokenStoreKey)) {
             return new AccessToken($storedToken);
         }
         
