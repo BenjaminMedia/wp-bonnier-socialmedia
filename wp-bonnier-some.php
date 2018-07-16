@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WP Bonnier SoMe
- * Version: 1.0.5
+ * Version: 1.1.0
  * Plugin URI: https://github.com/BenjaminMedia/wp-bonnier-some
  * Description: Plugin for integrating social media into the application.
  * Author: Bonnier
