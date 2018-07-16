@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Bonnier\WP\SoMe\Http\Controllers;
-
 
 use WP_REST_Request;
 use WP_REST_Response;

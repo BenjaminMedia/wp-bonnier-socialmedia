@@ -29,11 +29,11 @@ class FacebookController extends OAuthController
     public function options(WP_REST_Request $request): WP_REST_Response
     {
         $currentUser = wp_get_current_user();
-        if(!$currentUser || user_can($currentUser, 'manage_options')) {
+        if (!$currentUser || user_can($currentUser, 'manage_options')) {
             return $this->redirect($request->get_param('redirect_uri') ?: $this->homeUri);
         }
         
-        switch($request->get_param('option')) {
+        switch ($request->get_param('option')) {
             case 'instagram_account':
                 return $this->saveInstagramAccount($request);
         }
@@ -44,11 +44,11 @@ class FacebookController extends OAuthController
     private function saveInstagramAccount(WP_REST_Request $request)
     {
         $instagramId = $request->get_param('instagram_account_id');
-        if(!$instagramId) {
+        if (!$instagramId) {
             return $this->errorRedirect($request, 'No Instagram Account ID Submitted.');
         }
         
-        if(add_option(SettingsPage::INSTAGRAM_ID, $instagramId)) {
+        if (add_option(SettingsPage::INSTAGRAM_ID, $instagramId)) {
             return $this->redirect($request->get_param('redirect_uri') ?: $this->homeUri);
         }
         
@@ -57,8 +57,8 @@ class FacebookController extends OAuthController
     
     private function errorRedirect(WP_REST_Request $request, string $message)
     {
-        if($redirect = $request->get_param('redirect_uri')) {
-            if(str_contains($redirect, '?')) {
+        if ($redirect = $request->get_param('redirect_uri')) {
+            if (str_contains($redirect, '?')) {
                 return $this->redirect($redirect . '&error=' . urlencode($message));
             }
             return $this->redirect($redirect . '?error=' . urlencode($message));

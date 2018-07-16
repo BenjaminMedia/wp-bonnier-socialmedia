@@ -24,8 +24,8 @@ class PinterestProvider extends AbstractProvider
             'clientSecret' => $client['client_secret'],
             'redirectUri' => preg_replace('#^http://#', 'https://', $client['redirect_uri']),
         ]);
-        
     }
+
     /**
      * Returns the base URL for authorizing a client.
      *
@@ -85,7 +85,7 @@ class PinterestProvider extends AbstractProvider
      */
     protected function checkResponse(ResponseInterface $response, $data)
     {
-        if($response->getStatusCode() > 299) {
+        if ($response->getStatusCode() > 299) {
             throw new IdentityProviderException(
                 $response->getReasonPhrase(),
                 $response->getStatusCode(),

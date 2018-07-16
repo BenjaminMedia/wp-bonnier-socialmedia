@@ -2,7 +2,6 @@
 
 namespace Bonnier\WP\SoMe\Repositories;
 
-
 use Bonnier\WP\SoMe\Services\FacebookAccessTokenService;
 use Bonnier\WP\SoMe\Settings\SettingsPage;
 
@@ -20,8 +19,8 @@ class FacebookRepository extends BaseRepository
         $accounts = $this->get('me/accounts', [
             'fields' => 'instagram_business_account.fields(name)'
         ]);
-        if($accounts && $accounts->data) {
-            return collect($accounts->data)->map(function($account) {
+        if ($accounts && $accounts->data) {
+            return collect($accounts->data)->map(function ($account) {
                 return [
                     'id' => $account->instagram_business_account->id,
                     'name' => $account->instagram_business_account->name
@@ -34,7 +33,7 @@ class FacebookRepository extends BaseRepository
     
     public function getLatestInstagramPosts($limit = 10, $cursor = null, $fields = 'media_url,permalink,caption')
     {
-        if(!$this->instagramID) {
+        if (!$this->instagramID) {
             return null;
         }
         
@@ -43,7 +42,7 @@ class FacebookRepository extends BaseRepository
             'fields' => $fields
         ];
         
-        if($cursor) {
+        if ($cursor) {
             $query['after'] = $cursor;
         }
         

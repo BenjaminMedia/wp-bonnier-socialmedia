@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Bonnier\WP\SoMe\Services;
-
 
 use League\OAuth2\Client\Token\AccessToken;
 
