@@ -2,6 +2,7 @@
 
 namespace Bonnier\WP\SoMe\Providers;
 
+use Bonnier\WP\SoMe\Helpers\Storage;
 use Bonnier\WP\SoMe\ResourceOwners\FacebookResourceOwner;
 use Bonnier\WP\SoMe\SoMe;
 use League\OAuth2\Client\Provider\AbstractProvider;
@@ -20,7 +21,7 @@ class FacebookProvider extends AbstractProvider
         $this->endpoint = 'https://www.facebook.com/v2.12/';
         $this->graphUrl = 'https://graph.facebook.com/v2.12/';
         $client = SoMe::instance()->getSettings()->getFacebookClient();
-        
+
         parent::__construct([
             'clientId' => $client['client_id'],
             'clientSecret' => $client['client_secret'],
@@ -95,7 +96,16 @@ class FacebookProvider extends AbstractProvider
             );
         }
     }
-    
+
+    public function getResourceOwner(AccessToken $accessToken)
+    {
+        $response = Storage::remember('facebookResourceOwner', function () use ($accessToken) {
+            return parent::fetchResourceOwnerDetails($accessToken);
+        }, 24 * HOUR_IN_SECONDS);
+
+        return $this->createResourceOwner($response, $accessToken);
+    }
+
     /**
      * Generates a resource owner object from a successful resource owner
      * details request.

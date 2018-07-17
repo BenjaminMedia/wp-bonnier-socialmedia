@@ -13,44 +13,31 @@ class SoMeRepository
         $this->pinterest = new PinterestRepository();
     }
     
-    public function getFeed($cursor = null, $items = 10)
+    public function getFeed($offset = 0, $items = 10)
     {
-        $pinterestCursor = null;
-        $instagramCursor = null;
-        if ($cursor) {
-            $cursors = unserialize(base64_decode($cursor));
-            $pinterestCursor = $cursors['pin'] ?? null;
-            $instagramCursor = $cursors['ins'] ?? null;
-        }
-
         $pinterest = $instagram = null;
 
         if ($this->pinterest->isActive() && $this->facebook->isActive()) {
-            $pinterest = $this->pinterest->getLatestPins(floor($items / 2), $pinterestCursor);
-            $instagram = $this->facebook->getLatestInstagramPosts(ceil($items / 2), $instagramCursor);
+            $pinterest = $this->pinterest->getLatestPins(floor($items / 2), $offset);
+            $instagram = $this->facebook->getLatestInstagramPosts(ceil($items / 2), $offset);
         } elseif ($this->pinterest->isActive()) {
-            $pinterest = $this->pinterest->getLatestPins($items, $pinterestCursor);
+            $pinterest = $this->pinterest->getLatestPins($items, $offset);
         } else {
-            $instagram = $this->facebook->getLatestInstagramPosts($items, $instagramCursor);
+            $instagram = $this->facebook->getLatestInstagramPosts($items, $offset);
         }
-        
-        $nextCursor = [];
-        
+
         $response = [
-            'feed' => []
+            'feed' => [],
+            'offset' => $offset + $items,
         ];
         
         if ($pinterest) {
-            $response['feed']['pinterest'] = $pinterest->data ?? [];
-            $nextCursor['pin'] = $pinterest->page->cursor;
+            $response['feed']['pinterest'] = $pinterest ?? [];
         }
         if ($instagram) {
-            $response['feed']['instagram'] = $instagram->data ?? [];
-            $nextCursor['ins'] = $instagram->paging->cursors->after;
+            $response['feed']['instagram'] = $instagram ?? [];
         }
-        
-        $response['cursor'] = base64_encode(serialize($nextCursor));
-        
+
         return $response;
     }
 }

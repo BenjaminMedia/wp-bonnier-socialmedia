@@ -28,7 +28,7 @@ class OAuthController implements OAuthControllerContract
     public function authorize(WP_REST_Request $request): WP_REST_Response
     {
         $redirectUri = $request->get_param('redirect_uri') ?? $this->homeUri;
-        
+
         $authUrl = $this->provider->getAuthorizationUrl();
         
         $_SESSION['SoMeState'] = $this->provider->getState();
@@ -66,9 +66,10 @@ class OAuthController implements OAuthControllerContract
         return $this->redirect($redirectUri);
     }
     
-    protected function isStateValid(string $state = null): bool
+    protected function isStateValid(?string $state = null): bool
     {
         return isset($_SESSION['SoMeState']) &&
+            $state &&
             hash_equals($_SESSION['SoMeState'], $state);
     }
     

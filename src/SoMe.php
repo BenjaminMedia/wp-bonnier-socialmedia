@@ -2,6 +2,7 @@
 
 namespace Bonnier\WP\SoMe;
 
+use Bonnier\WP\SoMe\Commands\WarmStorage;
 use Bonnier\WP\SoMe\Http\Routes;
 use Bonnier\WP\SoMe\Repositories\SoMeRepository;
 use Bonnier\WP\SoMe\Settings\SettingsPage;
@@ -66,6 +67,9 @@ class SoMe
 
     public function bootstrap()
     {
+        if (defined('WP_CLI') && WP_CLI) {
+            WarmStorage::register();
+        }
         $this->routes = new Routes();
         $this->settings = new SettingsPage();
         $this->soMeRepo = new SoMeRepository();
