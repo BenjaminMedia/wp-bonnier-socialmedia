@@ -2,7 +2,6 @@
 
 namespace Bonnier\WP\SoMe\Repositories;
 
-use Bonnier\WP\SoMe\Helpers\Storage;
 use Bonnier\WP\SoMe\Services\PinterestAccessTokenService;
 use Illuminate\Support\Collection;
 
@@ -17,24 +16,25 @@ class PinterestRepository extends BaseRepository
     
     public function getLatestPins($limit = 10, $offset = 0): ?Collection
     {
-        if ($posts = Storage::get(self::STORAGE_KEY)) {
-            return collect($posts)->slice($offset, $limit);
+        if ($pins = $this->retrieveData(self::STORAGE_KEY)) {
+            return $pins->slice($offset, $limit);
         }
 
         return null;
     }
 
-    public function fetchPins()
+    public function storePins()
     {
+        if (!$this->isActive()) {
+            return;
+        }
         $response = $this->get('v1/me/pins', [
             'limit' => 500,
             'fields' => 'url,note,media,image'
         ]);
 
         if (isset($response->data)) {
-            return $response->data;
+            $this->storeData(self::STORAGE_KEY, $response->data);
         }
-
-        return null;
     }
 }

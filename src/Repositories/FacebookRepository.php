@@ -39,15 +39,19 @@ class FacebookRepository extends BaseRepository
     
     public function getLatestInstagramPosts($limit = 10, $offset = 0): ?Collection
     {
-        if ($posts = Storage::get(self::STORAGE_KEY)) {
-            return collect($posts)->slice($offset, $limit);
+        if ($posts = $this->retrieveData(self::STORAGE_KEY)) {
+            return $posts->slice($offset, $limit);
         }
 
         return null;
     }
 
-    public function fetchInstagramPosts()
+    public function storeInstagramPosts()
     {
+        if (!$this->isActive()) {
+            return;
+        }
+
         $response = $this->get(
             sprintf('%s/media', $this->instagramID),
             [
@@ -57,9 +61,7 @@ class FacebookRepository extends BaseRepository
         );
 
         if (isset($response->data)) {
-            return $response->data;
+            $this->storeData(self::STORAGE_KEY, $response->data);
         }
-
-        return null;
     }
 }

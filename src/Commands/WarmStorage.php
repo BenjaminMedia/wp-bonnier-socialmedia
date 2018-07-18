@@ -23,13 +23,10 @@ class WarmStorage
     public function warm()
     {
         $facebookRepo = new FacebookRepository();
-        if ($facebookRepo->isActive() && $posts = $facebookRepo->fetchInstagramPosts()) {
-            Storage::set(FacebookRepository::STORAGE_KEY, $posts);
-        }
+        $facebookRepo->storeInstagramPosts();
+
         $pinterestRepo = new PinterestRepository();
-        if ($pinterestRepo->isActive() && $pins = $pinterestRepo->fetchPins()) {
-            Storage::set(PinterestRepository::STORAGE_KEY, $pins);
-        }
+        $pinterestRepo->storePins();
 
         WP_CLI::success('Social Feed Storage Warmed!');
     }

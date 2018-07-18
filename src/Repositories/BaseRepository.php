@@ -2,8 +2,10 @@
 
 namespace Bonnier\WP\SoMe\Repositories;
 
+use Bonnier\WP\SoMe\Helpers\Storage;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use Illuminate\Support\Collection;
 use League\OAuth2\Client\Token\AccessToken;
 
 class BaseRepository implements RepositoryContract
@@ -71,6 +73,20 @@ class BaseRepository implements RepositoryContract
             return $result;
         }
         
+        return null;
+    }
+
+    public function storeData(string $key, $data)
+    {
+        Storage::set($key, $data);
+    }
+
+    public function retrieveData(string $key): ?Collection
+    {
+        if ($data = Storage::get($key)) {
+            return collect($data);
+        }
+
         return null;
     }
 
