@@ -36,7 +36,11 @@ class Routes
             $this->homeUrl = preg_replace('#^http://#', 'https://', home_url('/'));
         }
         if (substr($this->homeUrl, 0, 11) !== 'https://api') {
-            $this->homeUrl = str_replace('https://', 'https://api.', $this->homeUrl);
+            if (substr($this->homeUrl, 0, 14) === 'https://admin.') {
+                $this->homeUrl = str_replace('https://admin.', 'https://api.', $this->homeUrl);
+            } else {
+                $this->homeUrl = str_replace('https://', 'https://api.', $this->homeUrl);
+            }
         }
         
         add_action('rest_api_init', function () {
