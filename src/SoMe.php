@@ -87,5 +87,4 @@ class SoMe
         $this->pluginDir = plugin_dir_path($this->dir);
         $this->pluginUrl = plugin_dir_url($this->dir);
     }
-
 }
