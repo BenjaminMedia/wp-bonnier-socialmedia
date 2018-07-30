@@ -2,6 +2,7 @@
 
 namespace Bonnier\WP\SoMe\Http;
 
+use Bonnier\Willow\MuPlugins\LanguageProvider;
 use Bonnier\WP\SoMe\Http\Controllers\FacebookController;
 use Bonnier\WP\SoMe\Http\Controllers\PinterestController;
 use WP_REST_Server;
@@ -30,11 +31,7 @@ class Routes
     
     public function __construct()
     {
-        if (function_exists('pll_home_url')) {
-            $this->homeUrl = preg_replace('#^http://#', 'https://', pll_home_url());
-        } else {
-            $this->homeUrl = preg_replace('#^http://#', 'https://', home_url('/'));
-        }
+        $this->homeUrl = preg_replace('#^http://#', 'https://', LanguageProvider::getHomeUrl('/'));
         if (substr($this->homeUrl, 0, 11) !== 'https://api') {
             if (substr($this->homeUrl, 0, 14) === 'https://admin.') {
                 $this->homeUrl = str_replace('https://admin.', 'https://api.', $this->homeUrl);
