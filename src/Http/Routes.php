@@ -2,7 +2,7 @@
 
 namespace Bonnier\WP\SoMe\Http;
 
-use Bonnier\Willow\MuPlugins\LanguageProvider;
+use Bonnier\Willow\MuPlugins\Helpers\LanguageProvider;
 use Bonnier\WP\SoMe\Http\Controllers\FacebookController;
 use Bonnier\WP\SoMe\Http\Controllers\PinterestController;
 use WP_REST_Server;

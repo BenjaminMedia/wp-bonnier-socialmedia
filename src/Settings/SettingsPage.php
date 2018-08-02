@@ -2,7 +2,7 @@
 
 namespace Bonnier\WP\SoMe\Settings;
 
-use Bonnier\Willow\MuPlugins\LanguageProvider;
+use Bonnier\Willow\MuPlugins\Helpers\LanguageProvider;
 use Bonnier\WP\SoMe\Providers\FacebookProvider;
 use Bonnier\WP\SoMe\Providers\PinterestProvider;
 use Bonnier\WP\SoMe\Repositories\FacebookRepository;
