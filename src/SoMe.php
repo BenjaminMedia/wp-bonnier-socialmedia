@@ -74,7 +74,7 @@ class SoMe
         $this->settings = new SettingsPage();
         $this->soMeRepo = new SoMeRepository();
 
-        if (!session_id()) {
+        if (WP_ENV !== 'testing' && !session_id()) {
             session_start();
         }
     }
