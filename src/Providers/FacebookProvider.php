@@ -8,6 +8,7 @@ use Bonnier\WP\SoMe\SoMe;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
+use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Token\AccessTokenInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -57,11 +58,11 @@ class FacebookProvider extends AbstractProvider
     /**
      * Returns the URL for requesting the resource owner's details.
      *
-     * @param \League\OAuth2\Client\Token\AccessTokenInterface $token
+     * @param AccessToken $token
      *
      * @return string
      */
-    public function getResourceOwnerDetailsUrl(AccessTokenInterface $token)
+    public function getResourceOwnerDetailsUrl(AccessToken $token)
     {
         return $this->graphUrl . 'me?access_token=' . $token->getToken();
     }
@@ -98,7 +99,11 @@ class FacebookProvider extends AbstractProvider
         }
     }
 
-    public function getResourceOwner(AccessTokenInterface $accessToken)
+    /**
+     * @param AccessToken $accessToken
+     * @return ResourceOwnerInterface
+     */
+    public function getResourceOwner(AccessToken $accessToken)
     {
         $response = Storage::remember('facebookResourceOwner', function () use ($accessToken) {
             return parent::fetchResourceOwnerDetails($accessToken);
@@ -112,11 +117,11 @@ class FacebookProvider extends AbstractProvider
      * details request.
      *
      * @param  array                                           $response
-     * @param \League\OAuth2\Client\Token\AccessTokenInterface $token
+     * @param AccessToken $token
      *
      * @return ResourceOwnerInterface
      */
-    protected function createResourceOwner(array $response, AccessTokenInterface $token)
+    protected function createResourceOwner(array $response, AccessToken $token)
     {
         return new FacebookResourceOwner($response);
     }

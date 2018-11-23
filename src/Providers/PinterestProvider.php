@@ -7,6 +7,7 @@ use Bonnier\WP\SoMe\SoMe;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
+use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Token\AccessTokenInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -54,11 +55,11 @@ class PinterestProvider extends AbstractProvider
     /**
      * Returns the URL for requesting the resource owner's details.
      *
-     * @param \League\OAuth2\Client\Token\AccessTokenInterface $token
+     * @param \League\OAuth2\Client\Token\AccessToken $token
      *
      * @return string
      */
-    public function getResourceOwnerDetailsUrl(AccessTokenInterface $token)
+    public function getResourceOwnerDetailsUrl(AccessToken $token)
     {
         return $this->endpoint . '/v1/me/?access_token=' . $token->getToken();
     }
@@ -100,11 +101,11 @@ class PinterestProvider extends AbstractProvider
      * details request.
      *
      * @param  array                                           $response
-     * @param \League\OAuth2\Client\Token\AccessTokenInterface $token
+     * @param \League\OAuth2\Client\Token\AccessToken $token
      *
      * @return ResourceOwnerInterface
      */
-    protected function createResourceOwner(array $response, AccessTokenInterface $token)
+    protected function createResourceOwner(array $response, AccessToken $token)
     {
         return new PinterestResourceOwner($response);
     }
