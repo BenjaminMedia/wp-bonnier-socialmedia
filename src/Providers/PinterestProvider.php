@@ -8,17 +8,18 @@ use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 use League\OAuth2\Client\Token\AccessToken;
+use League\OAuth2\Client\Token\AccessTokenInterface;
 use Psr\Http\Message\ResponseInterface;
 
 class PinterestProvider extends AbstractProvider
 {
     private $endpoint;
-    
+
     public function __construct()
     {
         $this->endpoint = 'https://api.pinterest.com';
         $client = SoMe::instance()->getSettings()->getPinterestClient();
-        
+
         parent::__construct([
             'clientId' => $client['client_id'],
             'clientSecret' => $client['client_secret'],
@@ -37,7 +38,7 @@ class PinterestProvider extends AbstractProvider
     {
         return $this->endpoint . '/oauth';
     }
-    
+
     /**
      * Returns the base URL for requesting an access token.
      *
@@ -50,18 +51,19 @@ class PinterestProvider extends AbstractProvider
     {
         return $this->endpoint . '/v1/oauth/token';
     }
-    
+
     /**
      * Returns the URL for requesting the resource owner's details.
      *
-     * @param AccessToken $token
+     * @param \League\OAuth2\Client\Token\AccessToken $token
+     *
      * @return string
      */
     public function getResourceOwnerDetailsUrl(AccessToken $token)
     {
         return $this->endpoint . '/v1/me/?access_token=' . $token->getToken();
     }
-    
+
     /**
      * Returns the default scopes used by this provider.
      *
@@ -74,7 +76,7 @@ class PinterestProvider extends AbstractProvider
     {
         return ['read_public'];
     }
-    
+
     /**
      * Checks a provider response for errors.
      *
@@ -93,13 +95,14 @@ class PinterestProvider extends AbstractProvider
             );
         }
     }
-    
+
     /**
      * Generates a resource owner object from a successful resource owner
      * details request.
      *
-     * @param  array $response
-     * @param  AccessToken $token
+     * @param  array                                           $response
+     * @param \League\OAuth2\Client\Token\AccessToken $token
+     *
      * @return ResourceOwnerInterface
      */
     protected function createResourceOwner(array $response, AccessToken $token)

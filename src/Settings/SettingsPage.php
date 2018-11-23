@@ -2,6 +2,7 @@
 
 namespace Bonnier\WP\SoMe\Settings;
 
+use Bonnier\Willow\MuPlugins\Helpers\LanguageProvider;
 use Bonnier\WP\SoMe\Providers\FacebookProvider;
 use Bonnier\WP\SoMe\Providers\PinterestProvider;
 use Bonnier\WP\SoMe\Repositories\FacebookRepository;
@@ -304,13 +305,13 @@ class SettingsPage
 
     private function languages_is_enabled()
     {
-        return function_exists('Pll') && PLL()->model->get_languages_list();
+        return LanguageProvider::enabled();
     }
 
     private function get_languages()
     {
         if ($this->languages_is_enabled()) {
-            return PLL()->model->get_languages_list();
+            return LanguageProvider::getLanguageList();
         }
         return false;
     }
@@ -318,24 +319,22 @@ class SettingsPage
     /**
      * Get the current language by looking at the current HTTP_HOST
      *
-     * @return null|PLL_Language
+     * @return null|string
      */
     private function get_current_language()
     {
         if ($this->languages_is_enabled()) {
-            if ($language = PLL()->model->get_language(pll_current_language())) {
+            if ($language = LanguageProvider::getCurrentLanguage('locale')) {
                 return $language;
-            } else {
-                return PLL()->model->get_language(pll_default_language());
             }
+            return LanguageProvider::getDefaultLanguage('locale');
         }
         return null;
     }
 
     private function get_current_locale()
     {
-        $currentLang = $this->get_current_language();
-        return $currentLang ? $currentLang->locale : null;
+        return $this->get_current_language() ?? null;
     }
 
     private function get_select_field_options($field)

@@ -13,19 +13,19 @@ class BaseRepository implements RepositoryContract
     protected $client;
     protected $active;
     
-    public function __construct(string $base_uri, AccessToken $accessToken = null)
+    public function __construct(string $baseURI, AccessToken $accessToken = null)
     {
         $this->active = false;
         if ($accessToken && $accessToken->getToken()) {
             $this->active = true;
-            $this->client = $this->createClient($base_uri, $accessToken);
+            $this->client = $this->createClient($baseURI, $accessToken);
         }
     }
     
-    public function createClient(string $base_uri, AccessToken $accessToken = null): Client
+    public function createClient(string $baseURI, AccessToken $accessToken = null): Client
     {
         $config = [
-            'base_uri' => $base_uri,
+            'base_uri' => $baseURI,
             'headers' => [
                 'Accept' => 'application/json'
             ],

@@ -9,13 +9,14 @@ use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 use League\OAuth2\Client\Token\AccessToken;
+use League\OAuth2\Client\Token\AccessTokenInterface;
 use Psr\Http\Message\ResponseInterface;
 
 class FacebookProvider extends AbstractProvider
 {
     private $endpoint;
     private $graphUrl;
-    
+
     public function __construct()
     {
         $this->endpoint = 'https://www.facebook.com/v2.12/';
@@ -28,7 +29,7 @@ class FacebookProvider extends AbstractProvider
             'redirectUri' => preg_replace('#^http://#', 'https://', $client['redirect_uri']),
         ]);
     }
-    
+
     /**
      * Returns the base URL for authorizing a client.
      *
@@ -40,7 +41,7 @@ class FacebookProvider extends AbstractProvider
     {
         return $this->endpoint . 'dialog/oauth';
     }
-    
+
     /**
      * Returns the base URL for requesting an access token.
      *
@@ -53,18 +54,19 @@ class FacebookProvider extends AbstractProvider
     {
         return $this->graphUrl . 'oauth/access_token';
     }
-    
+
     /**
      * Returns the URL for requesting the resource owner's details.
      *
      * @param AccessToken $token
+     *
      * @return string
      */
     public function getResourceOwnerDetailsUrl(AccessToken $token)
     {
         return $this->graphUrl . 'me?access_token=' . $token->getToken();
     }
-    
+
     /**
      * Returns the default scopes used by this provider.
      *
@@ -77,7 +79,7 @@ class FacebookProvider extends AbstractProvider
     {
         return ['manage_pages', 'instagram_basic'];
     }
-    
+
     /**
      * Checks a provider response for errors.
      *
@@ -97,6 +99,10 @@ class FacebookProvider extends AbstractProvider
         }
     }
 
+    /**
+     * @param AccessToken $accessToken
+     * @return ResourceOwnerInterface
+     */
     public function getResourceOwner(AccessToken $accessToken)
     {
         $response = Storage::remember('facebookResourceOwner', function () use ($accessToken) {
@@ -110,8 +116,9 @@ class FacebookProvider extends AbstractProvider
      * Generates a resource owner object from a successful resource owner
      * details request.
      *
-     * @param  array $response
-     * @param  AccessToken $token
+     * @param  array                                           $response
+     * @param AccessToken $token
+     *
      * @return ResourceOwnerInterface
      */
     protected function createResourceOwner(array $response, AccessToken $token)
